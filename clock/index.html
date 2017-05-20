@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>简易时钟</title>
+</head>
+<body>
+<canvas id="gameCanvas" width="650" height="700"></canvas>
+<script type="text/javascript" src="../lib/cocos2d-js-v3.13-lite.js" charset="UTF-8"></script>
+<script type="text/javascript">
+    window.onload = function () {
+
+        let resources = ["assets/background.jpg", "assets/hour.png", "assets/minute.png", "assets/second.png"];
+        const ANGLE = 6;
+        
+        cc.game.onStart = function () {
+            //load resources
+            cc.LoaderScene.preload(resources, function () {
+                let size = cc.director.getWinSize();
+                
+                // 背景层
+                let MMBackgroudLayer = cc.Layer.extend({
+                    ctor(){
+                        this._super();
+                        this.createBackground();
+                        return true;
+                    },
+                    createBackground(){
+                        let bg = cc.Sprite.create(resources[0]);
+                        bg.setPosition(size.width / 2, size.height / 2);
+                        this.addChild(bg, 0);
+                    }
+                });
+                
+                // 时钟层
+                let MMClockLayer = cc.Layer.extend({
+                    ctor(){
+                        this._super();
+                        this.createHour();
+                        this.createMinute();
+                        this.createSecond();
+                        
+                        this.setScale(0.6);
+                        return true;
+                    },
+                    onEnter(){
+                        this._super();
+                        
+                        // 初始化角度
+                        this.init();
+                        
+                        // 开启定时器
+                        this.schedule(()=>{
+                            this.update();
+                        }, 1);
+                    },
+                    init(){
+                        // 这里应该调用cc的接口才对
+                        let now = new Date();
+                        let h = now.getHours(),
+                            m = now.getMinutes(),
+                            s = now.getSeconds();
+                        
+                        h = h < 12 ? h : h-12;
+                        
+                        this.hour.setRotation(h*360/12);
+                        this.minute.setRotation(m*ANGLE);
+                        this.second.setRotation(s*ANGLE);
+                    },
+                    update(){
+                        let second = this.second,
+                            minute = this.minute,
+                            hour = this.hour;
+                        
+                        second.setRotation(second.getRotation() + ANGLE);
+                        // 秒针转满一圈
+                        if (second.getRotation() === 360){
+                            minute.setRotation(minute.getRotation() + ANGLE);
+                            second.setRotation(0);
+                            
+                            // 分针转满一圈
+                            if (minute.getRotation() === 360){
+                                hour.setRotation(hour.getRotation() + ANGLE);
+                                minute.setRotation(0);
+                            }
+                        }
+                    },
+                    // 这里的重复代码看起来很蛋疼，但是为了表明创建的3个精灵，这里就不进一步处理了
+                    createHour(){
+                        let hour = cc.Sprite.create(resources[1]);
+                        hour.setAnchorPoint(0.5, 0.13);
+                        hour.setPosition(size.width / 2, size.height / 2);
+
+                        this.addChild(hour, 1);
+                        this.hour = hour;
+                    },
+                    createMinute(){
+                        let minute = cc.Sprite.create(resources[2]);
+                        minute.setAnchorPoint(0.5, 0.08);
+                        minute.setPosition(size.width / 2, size.height / 2);
+
+                        this.addChild(minute, 2);
+                        this.minute = minute;
+                    },
+                    createSecond(){
+                        let second = cc.Sprite.create(resources[3]);
+                        second.setAnchorPoint(0.5, 0.066);
+                        second.setPosition(size.width / 2, size.height / 2);
+
+                        this.addChild(second, 3);
+                        this.second = second;
+                    }
+                });
+                
+                // 注册场景
+                let MyScene = cc.Scene.extend({
+                    onEnter: function () {
+                        this._super();
+                        
+                        // 添加层
+                        this.addChild(new MMBackgroudLayer(), 0);
+                        this.addChild(new MMClockLayer(), 1);
+                    }
+                });
+                
+                cc.director.runScene(new MyScene());
+            }, this);
+        };
+        
+        cc.game.run("gameCanvas");
+    };
+</script>
+</body>
+</html>
