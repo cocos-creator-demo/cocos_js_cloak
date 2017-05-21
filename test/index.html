@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <style>
+        canvas {
+            border: 1px solid #dedede;
+        }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas" width="650" height="700"></canvas>
+<script type="text/javascript" src="../lib/cocos2d-js-v3.13-lite.js" charset="UTF-8"></script>
+<script type="text/javascript">
+    window.onload = function () {
+        cc.game.onStart = function () {
+            //load resources
+            let size = cc.director.getWinSize();
+            
+            
+            
+            // 注册场景
+            let MyScene = cc.Scene.extend({
+                onEnter: function () {
+                    // 创建颜色层
+                    let dialog = new cc.LayerColor(cc.color(0,0,0,123), size.width, size.height);
+                    this.addChild(dialog);
+
+                    // 通过色彩创建精灵
+                    let red = new cc.Sprite();
+                    red.setColor(cc.color(255, 0, 0));
+                    red.setTextureRect(cc.rect(0, 0, 200, 200));
+                    this.addChild(red);
+                    
+                }
+            });
+            
+            cc.director.runScene(new MyScene());
+        };
+        
+        cc.game.run("gameCanvas");
+    };
+</script>
+</body>
+</html>
